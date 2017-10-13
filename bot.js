@@ -1,5 +1,6 @@
 var HTTPS = require('https');
 var cool = require('cool-ascii-faces');
+const espnApi = require('./espn-api');
 
 var botID = process.env.BOT_ID;
 
@@ -7,6 +8,11 @@ function respond() {
   var request = JSON.parse(this.req.chunks[0]),
       botRegex = /^\/cool guy$/,
       teamRegex = /^\/teams$/;
+  
+  let commandRegex = [
+    '/^\/teams$/',
+    '/^\/scores$/'
+  ];
 
   if(request.text && botRegex.test(request.text)) {
     this.res.writeHead(200);
@@ -26,7 +32,7 @@ function respond() {
 function postMessage() {
   var botResponse, options, body, botReq;
 
-  botResponse = 'These are the teams:';//cool();
+  botResponse = espnApi.getTeams();
 
   options = {
     hostname: 'api.groupme.com',
