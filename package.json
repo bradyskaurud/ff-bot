@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
-  "version": "0.1.2",
-  "description": "A sample Node.js app using Express 4",
+  "name": "ff-group-me-bot",
+  "version": "0.0.1",
+  "description": "GroupMe bot for FF espn scraping",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -13,7 +13,8 @@
     "cheerio": "1.0.0-rc.2"
   },
   "engines": {
-    "node": "0.10.x"
+    "node": "6.9.5",
+    "npm": "3.10.10"
   },
   "repository": {
     "type": "git",
