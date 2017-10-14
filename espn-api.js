@@ -63,15 +63,17 @@ module.exports = {
         }
         if (!err) {
           $ = cheerio.load(html);
-          const team1Name = $('.teamInfoOwnerData')[0].children().text();
-          const team2Name = $('.teamInfoOwnerData')[1].children().text();
+          const teamNames = [];
+          $('.teamInfoOwnerData').each(function(i, elemn) {
+            teamNames.push($(this).text());
+          });
 
           const team1 = {
-            name: $('.teamInfoOwnerData').text(),
+            name: teamNames[0],
             players: []
           };
           const team2 = {
-            name: $('.teamInfoOwnerData').text(),
+            name: teamNames[1],
             players: []
           };
 
@@ -82,7 +84,8 @@ module.exports = {
             team1.players.push({
               position: $(this).find('.playerSlot').text(),
               name: $(this).find('.playertablePlayerName').children().text(),
-              points: $(this).find('.appliedPoints').text()
+              points: $(this).find('.appliedPoints').text(),
+              owner: team1.name,
             })
           });
 
@@ -90,7 +93,8 @@ module.exports = {
             team2.players.push({
               position: $(this).find('.playerSlot').text(),
               name: $(this).find('.playertablePlayerName').children().text(),
-              points: $(this).find('.appliedPoints').text()
+              points: $(this).find('.appliedPoints').text(),
+              owner: team2.name
             })
           });
 

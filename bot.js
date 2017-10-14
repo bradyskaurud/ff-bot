@@ -1,5 +1,6 @@
 const HTTPS = require('https');
 const scraper = require('./espn-api');
+const weekParser = require('./nfl-weeks');
 
 const botID = process.env.BOT_ID;
 
@@ -9,43 +10,51 @@ function respond() {
   
   let commandRegex = {
     "team": /^\/teams$/,
-    "scores": /^\/scores$/,
     "highestTeam": /^\/high-team/,
-    "highestPlayer": /^\/high-player/
+    "highestTeamWithWeek": /^\/high-team(\s\d+$)/,
+    "highestPlayer": /^\/high-player/,
+    "highestPlayerWithWeek": /^\/high-player(\s\d+$)/
   };
 
-  if(message && commandRegex.team.test(message)) {
-    this.res.writeHead(200);
-    getTeam(1).then((result) => {
-      console.log(result);
-    });
-    this.res.end();
-  } else if (request.text && commandRegex.scores.test(request.text)) {
-    this.res.writeHead(200);
-    scraper.getBoxScore().then((result) => {
-      var team1HighestPlayer = result.team1.players.reduce(function(l, e) {
-        return parseFloat(e.points)  > parseFloat(l.points)  ? e : l;
-      });
+  if (request.text && (commandRegex.highestTeam.test(request.text) || commandRegex.highestTeamWithWeek.test(message))) {
+    let week = weekParser.getCurrentWeek();
+    if (commandRegex.highestTeamWithWeek.test(message)) {
+      week = parseInt(message.match(/\d+$/)[0]);
+    }
 
-      console.log(team1HighestPlayer);
+    if (week > weekParser.getCurrentWeek()) {
+      postMessage('This is in the future ya dummy!');
+      this.res.end();
+      return;
+    }
+
+    scraper.getHighestScoringTeam(1504618, week).then((result) => {
+      postMessage(`Highest Scoring Team\nWeek: ${week}\n----------------------\n${result.name}\n(${result.points})`);
+      this.res.end();
     });
-    this.res.end();
-  } else if (request.text && commandRegex.highestTeam.test(request.text)) {
-    scraper.getHighestScoringTeam(1504618, 5).then((result) => {
-      console.log(result);
-    });
-  } else if (request.text && commandRegex.highestPlayer.test(request.text)) {
+  } else if (message && (commandRegex.highestPlayer.test(message) || commandRegex.highestPlayerWithWeek.test(message))) {
+    let week = weekParser.getCurrentWeek();
+    if (commandRegex.highestPlayerWithWeek.test(message)) {
+      week = parseInt(message.match(/\d+$/)[0]);
+    }
+
+    if (week > weekParser.getCurrentWeek()) {
+      postMessage('This is in the future ya dummy!');
+      this.res.end();
+      return;
+    }
+
     Promise.all([
-      scraper.getHighestScoringPlayer(1504618, 5, 1, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 2, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 3, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 6, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 8, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 9, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 10, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 12, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 13, 2017),
-      scraper.getHighestScoringPlayer(1504618, 5, 14, 2017)
+      scraper.getHighestScoringPlayer(1504618, week, 1, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 2, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 3, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 6, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 8, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 9, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 10, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 12, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 13, 2017),
+      scraper.getHighestScoringPlayer(1504618, week, 14, 2017)
     ]).then((result) => {
       console.log(result);
       let highestScoringPlayers = [];
@@ -64,6 +73,8 @@ function respond() {
         return parseFloat(e.points)  > parseFloat(l.points)  ? e : l;
       });
       console.log(highestPlayer);
+      postMessage(`Highest Scoring Player\nWeek: ${week}\n----------------------\n${highestPlayer.name} (${highestPlayer.points})\n${highestPlayer.owner}`);
+      this.res.end();
     });
   } else {
     console.log("don't care");
