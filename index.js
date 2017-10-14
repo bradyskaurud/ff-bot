@@ -30,6 +30,6 @@ server.listen(port);
 
 function ping() {
   this.res.writeHead(200);
-  console.log(espnApi.getTeam(1));
-  this.res.end(espnApi.getTeam(1));
+  //console.log(espnApi.getTeam(1));
+  this.res.end('hello');
 }
