@@ -13,10 +13,11 @@ function respond() {
     "highestTeam": /^\/high-team/,
     "highestTeamWithWeek": /^\/high-team(\s\d+$)/,
     "highestPlayer": /^\/high-player/,
-    "highestPlayerWithWeek": /^\/high-player(\s\d+$)/
+    "highestPlayerWithWeek": /^\/high-player(\s\d+$)/,
+    "commands": /^\/commands/
   };
 
-  if (request.text && (commandRegex.highestTeam.test(request.text) || commandRegex.highestTeamWithWeek.test(message))) {
+  if (message && (commandRegex.highestTeam.test(message) || commandRegex.highestTeamWithWeek.test(message))) {
     let week = weekParser.getCurrentWeek();
     if (commandRegex.highestTeamWithWeek.test(message)) {
       week = parseInt(message.match(/\d+$/)[0]);
@@ -56,7 +57,6 @@ function respond() {
       scraper.getHighestScoringPlayer(1504618, week, 13, 2017),
       scraper.getHighestScoringPlayer(1504618, week, 14, 2017)
     ]).then((result) => {
-      console.log(result);
       let highestScoringPlayers = [];
 
       result.forEach((matchup) => {
@@ -72,10 +72,19 @@ function respond() {
       let highestPlayer = highestScoringPlayers.reduce(function(l, e) {
         return parseFloat(e.points)  > parseFloat(l.points)  ? e : l;
       });
-      console.log(highestPlayer);
       postMessage(`Highest Scoring Player\nWeek: ${week}\n----------------------\n${highestPlayer.name} (${highestPlayer.points})\n${highestPlayer.owner}`);
       this.res.end();
     });
+  } else if (message && (commandRegex.commands.test(message))) {
+    const commandHeader = `Commands\n----------------------\n`,
+      highTeam = `/high-team n\n`,
+      highPlayer = `/high-player n\n`,
+      weekOptional = `(n is optional for week number)`;
+
+
+
+    postMessage(`${commandHeader}${highTeam}${highPlayer}${weekOptional}`);
+    this.res.end();
   } else {
     console.log("don't care");
     this.res.writeHead(200);
